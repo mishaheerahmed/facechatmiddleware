@@ -27,6 +27,7 @@ public class BlogController {
 	{		
 		if(blogDAO.addBlog(blog))
 		{
+			blog.setStatus("N");
 			return new ResponseEntity<String>("Blog Added",HttpStatus.OK);
 		}
 		else
