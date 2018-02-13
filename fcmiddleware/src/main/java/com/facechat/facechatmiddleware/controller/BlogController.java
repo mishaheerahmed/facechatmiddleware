@@ -25,9 +25,9 @@ public class BlogController {
 	@RequestMapping(value ="/insertBlog")
 	public ResponseEntity<String> insertBlog(@RequestBody Blog blog)
 	{		
+		blog.setStatus("N");
 		if(blogDAO.addBlog(blog))
 		{
-			blog.setStatus("N");
 			return new ResponseEntity<String>("Blog Added",HttpStatus.OK);
 		}
 		else

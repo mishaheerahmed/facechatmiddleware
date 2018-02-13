@@ -1,5 +1,6 @@
 package com.facechat.facechatmiddleware.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.facechat.facechatbackend.dao.FriendDAO;
+import com.facechat.facechatbackend.dao.UserDAO;
 import com.facechat.facechatbackend.model.Friend;
+import com.facechat.facechatbackend.model.UserDetail;
 
 
 @RestController
@@ -24,7 +27,10 @@ public class FriendController
 @Autowired
  FriendDAO friendDAO;
  
- @PostMapping(value="/createfriendrequest")
+@Autowired
+UserDAO userDAO;
+
+@PostMapping(value="/createfriendrequest")
  public ResponseEntity<String> createfriendrequest(@RequestBody Friend friend)
  {
 	 friend.setStatus("R");
@@ -71,15 +77,60 @@ public class FriendController
 	 }
  }
  
-@GetMapping(value="/getAllFriendRequest")
-public ResponseEntity<List<Friend>> getAllFriendRequest(HttpSession session)
-{
-	String currentUser=(String)session.getAttribute("currentUser");
-	currentUser="shaheer";
-	System.out.println("Current user:"+ currentUser);
-	List<Friend> listfriendrequests=friendDAO.getAllFriendRequest(currentUser);
-	return new ResponseEntity<List<Friend>>(listfriendrequests,HttpStatus.OK);
+ @GetMapping(value="/getapprovefriends/{userName}")
+	public ResponseEntity<List<Friend>> getapprovefriends(@PathVariable("userName") String userName)
+	{
+		System.out.println("obj**"+friendDAO);
+		List<Friend> listfriends = (ArrayList) friendDAO.getApprovedFriends(userName);
+		return new ResponseEntity<List<Friend>>(listfriends,HttpStatus.OK);
+	}
+ 
+ @GetMapping(value="/getfriend/{friendid}")
+	public ResponseEntity<Friend> acceptfriend(@PathVariable("friendid") int friendid)
+	{
+		Friend b=friendDAO.getfriendbyid(friendid);
+		if(b!=null)
+		 {
+		    System.out.println(b);
+		    
+	        return new ResponseEntity<Friend>(b,HttpStatus.OK);
+	      }
+		 else
+	      {
+		   return new ResponseEntity<Friend>(b,HttpStatus.INTERNAL_SERVER_ERROR);	
+	      }
+	    
 }
  
+@GetMapping(value="/getAllFriendRequest/{userName}")
+public ResponseEntity<List<Friend>> getAllFriendRequest(@PathVariable("userName") String userName)
+{
+	System.out.println("obj**"+friendDAO);
+	List<Friend> listfriends = (ArrayList) friendDAO.getAllFriendRequest(userName);
+	return new ResponseEntity<List<Friend>>(listfriends,HttpStatus.OK);
+}
  
+@GetMapping(value="/getAllusers/{username}")
+public ResponseEntity<List> getalluser(@PathVariable("username") String username)
+{
+	UserDetail u=userDAO.getUser(username);
+	System.out.println("obj**"+friendDAO);
+	List listfriends = (ArrayList) userDAO.getalluser1(u);
+	return new ResponseEntity<List>(listfriends,HttpStatus.OK);
+}
+@GetMapping(value="/deletefriend/{friendId}")
+public ResponseEntity<Friend> deletefriend(@PathVariable("friendId") int friendId)
+{
+	//System.out.println("obj**"+friendDAO);
+	Friend f=friendDAO.getfriendbyid(friendId);
+	f.setStatus("R");
+	if(friendDAO.deletefriend(f))
+	{
+	return new ResponseEntity<Friend>(f,HttpStatus.OK);
+    }
+	else
+	{
+		return new ResponseEntity<Friend>(f,HttpStatus.INTERNAL_SERVER_ERROR);	
+	}
+}
 }//class close
